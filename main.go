@@ -5,8 +5,8 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/lifenglsf/gpt/config"
-	"github.com/lifenglsf/gpt/services"
+	"github.com/lifenglsf/self_gpt_backend/config"
+	"github.com/lifenglsf/self_gpt_backend/services"
 	"log"
 	"net/http"
 )
@@ -96,10 +96,10 @@ func main() {
 		if err := c.Validate(msg); err != nil {
 			return err
 		}
-	//	msg.Messages = append(msg.Messages, services.Message{
-	//		Role:    "user",
-	//		Content: "算法",
-	//	})
+		//	msg.Messages = append(msg.Messages, services.Message{
+		//		Role:    "user",
+		//		Content: "算法",
+		//	})
 		c.Set("requestJson", msg)
 		chat = &services.BaiduChat{Context: c}
 		return chat.Gen("v1")
