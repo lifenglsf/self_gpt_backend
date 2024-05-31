@@ -1,0 +1,34 @@
+server:
+  address:     ":8000"
+database:
+  default:
+    host: "127.0.0.1"
+    port: "3306"
+    user: "root"
+    pass: "root"
+    name: "gpt"
+    type: "mysql"
+    extra: "loc=Local&parseTime=true"
+    debug: "true"
+    charset: "utf8mb4"
+gpt_conf:
+  spark:
+    appid: 星火appid
+    apiSecret: 星火secrets
+    apiKey: 星火api key
+  baidu:
+    appid: 百度appid
+    apiKey: 百度apikey
+    apiSecret: 百度secrets
+  ali:
+    appid:
+    apiKey:
+    apiSecret: 阿里secrets
+  deep:
+    appid:
+    apiKey: deepseek api key
+    apiSecret:
+
+
+
+

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Stream Example</title>
+</head>
+<body>
+<pre id="output"></pre>
+<script>
+    const output = document.getElementById('output');
+
+    fetch('/baidu/v1')
+        .then(response => {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let data = '';
+
+            reader.read().then(function processText({ done, value }) {
+                if (done) {
+                    console.log('Stream complete');
+                    return;
+                }
+
+                data += decoder.decode(value);
+                output.textContent = data;
+
+                return reader.read().then(processText);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+</script>
+</body>
+</html>

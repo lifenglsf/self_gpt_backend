@@ -1,0 +1,41 @@
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"time"
+)
+
+func streamHandler(w http.ResponseWriter, r *http.Request) {
+	// Ensure the response can be flushed
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
+		return
+	}
+
+	// Set headers to prevent buffering
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Transfer-Encoding", "chunked")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	// Write initial HTML to keep the browser from buffering
+	fmt.Fprint(w, "<html><head><meta ></head><body><pre>")
+
+	message := "Hello, World!"
+	for _, char := range message {
+		fmt.Fprintf(w, "%c", char)
+		flusher.Flush()                    // Ensure each character is sent immediately
+		time.Sleep(200 * time.Millisecond) // Delay between characters
+	}
+
+	// Close the HTML tags
+	fmt.Fprint(w, "</pre></body></html>")
+}
+
+func main() {
+	http.HandleFunc("/stream", streamHandler)
+	fmt.Println("Server started at :8080")
+	http.ListenAndServe(":8080", nil)
+}
