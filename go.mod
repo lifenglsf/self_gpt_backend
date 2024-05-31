@@ -1,4 +1,4 @@
-module github.com/lifenglsf/gpt
+module github.com/lifenglsf/self_gpt_backend
 
 go 1.22.2
 
