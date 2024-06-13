@@ -22,6 +22,14 @@ type SparkChat struct {
 	echo.Context
 }
 
+func (sc SparkChat) Model() map[string]string {
+	return map[string]string{
+		"spark_lite": "v1",
+		"spark_v2":   "v2",
+		"spark_pro":  "v3",
+		"spark_v3.5": "v3.5",
+	}
+}
 func (sc *SparkChat) Gen(ver string) error {
 	conf := config.GetSparkConf()
 	appid := conf.Appid
@@ -30,8 +38,15 @@ func (sc *SparkChat) Gen(ver string) error {
 	d := websocket.Dialer{
 		HandshakeTimeout: 5 * time.Second,
 	}
+	requstData := sc.Get("requestJson").(*Requests)
+	model := requstData.Model
+	smodel := sc.Model()
+	if model == "" {
+		model = "lite"
+	}
+	version := smodel[model]
 	//握手并建立websocket 连接
-	conn, resp, err := d.Dial(assembleAuthUrl1(ver, apiKey, apiSecret), nil)
+	conn, resp, err := d.Dial(assembleAuthUrl1(version, apiKey, apiSecret), nil)
 	if err != nil {
 		return fmt.Errorf("%s%s", "ws dial failed", err)
 	} else if resp.StatusCode != 101 {
@@ -49,14 +64,14 @@ func (sc *SparkChat) Gen(ver string) error {
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			utils.StreamOut(sc.Response(), utils.FormatFailedMsg("read message error:"+err.Error()))
+			utils.Stream(sc.Response(), utils.FormatFailedMsg("read message error:"+err.Error()))
 			return nil
 		}
 
 		var data map[string]interface{}
 		err1 := json.Unmarshal(msg, &data)
 		if err1 != nil {
-			utils.StreamOut(sc.Response(), utils.FormatFailedMsg("parse json error:%s"+err1.Error()))
+			utils.Stream(sc.Response(), utils.FormatFailedMsg("parse json error:%s"+err1.Error()))
 			return nil
 		}
 		//fmt.Println(string(msg))
@@ -74,13 +89,14 @@ func (sc *SparkChat) Gen(ver string) error {
 		//fmt.Println(status)
 		text := choices["text"].([]interface{})
 		content := text[0].(map[string]interface{})["content"].(string)
+		log.Println(content)
+
 		if status != 2 {
-			log.Println(content)
-			utils.StreamOut(sc.Response(), content)
+			utils.Stream(sc.Response(), content)
 			answer += content
 		} else {
 			fmt.Println("收到最终结果")
-			utils.StreamOut(sc.Response(), content)
+			utils.Stream(sc.Response(), content)
 			answer += content
 			usage := payload["usage"].(map[string]interface{})
 			temp := usage["text"].(map[string]interface{})
@@ -166,11 +182,11 @@ func genParams1(ver, appid string, msg []Message) map[string]interface{} { // �
 		},
 		"parameter": map[string]interface{}{ // 根据实际情况修改返回的数据结构和字段名
 			"chat": map[string]interface{}{ // 根据实际情况修改返回的数据结构和字段名
-				"domain":      domain,     // 根据实际情况修改返回的数据结构和字段名
-				"temperature": 0.5,        // 根据实际情况修改返回的数据结构和字段名
-				"top_k":       int64(4),   // 根据实际情况修改返回的数据结构和字段名
-				"max_tokens":  int64(150), // 根据实际情况修改返回的数据结构和字段名
-				"auditing":    "default",  // 根据实际情况修改返回的数据结构和字段名
+				"domain": domain, // 根据实际情况修改返回的数据结构和字段名
+				//"temperature": 0.5,        // 根据实际情况修改返回的数据结构和字段名
+				//"top_k":       int64(4),   // 根据实际情况修改返回的数据结构和字段名
+				//"max_tokens":  int64(150), // 根据实际情况修改返回的数据结构和字段名
+				//"auditing":    "default",  // 根据实际情况修改返回的数据结构和字段名
 			},
 		},
 		"payload": map[string]interface{}{ // 根据实际情况修改返回的数据结构和字段名

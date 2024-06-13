@@ -35,7 +35,7 @@ func main() {
 		return nil
 	})
 	var chat services.ChatInterface
-	spg := e.Group("/spark")
+	spg := e.Group("/api/spark")
 	spg.POST("/v1", func(c echo.Context) error {
 		chat = &services.SparkChat{Context: c}
 		msg := new(services.Requests)
@@ -87,7 +87,6 @@ func main() {
 	})
 	bag := e.Group("/api/baidu")
 	bag.POST("/v1", func(c echo.Context) error {
-		log.Println("cccc")
 		msg := new(services.Requests)
 		if err := c.Bind(msg); err != nil {
 			log.Println("validate error")
@@ -103,7 +102,6 @@ func main() {
 		c.Set("requestJson", msg)
 		chat = &services.BaiduChat{Context: c}
 		return chat.Gen("v1")
-		return nil
 	})
 	ag := e.Group("/ali")
 	ag.POST("/v1", func(c echo.Context) error {
