@@ -42,7 +42,7 @@ func (sc *SparkChat) Gen(ver string) error {
 	model := requstData.Model
 	smodel := sc.Model()
 	if model == "" {
-		model = "lite"
+		model = "spark_lite"
 	}
 	version := smodel[model]
 	//握手并建立websocket 连接
@@ -60,6 +60,9 @@ func (sc *SparkChat) Gen(ver string) error {
 
 	}()
 	var answer = ""
+	w := sc.Response()
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
 	//获取返回的数据
 	for {
 		_, msg, err := conn.ReadMessage()
@@ -93,10 +96,12 @@ func (sc *SparkChat) Gen(ver string) error {
 
 		if status != 2 {
 			utils.Stream(sc.Response(), content)
+			sc.Response().Flush()
 			answer += content
 		} else {
 			fmt.Println("收到最终结果")
 			utils.Stream(sc.Response(), content)
+			sc.Response().Flush()
 			answer += content
 			usage := payload["usage"].(map[string]interface{})
 			temp := usage["text"].(map[string]interface{})

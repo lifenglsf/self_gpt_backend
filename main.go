@@ -103,7 +103,7 @@ func main() {
 		chat = &services.BaiduChat{Context: c}
 		return chat.Gen("v1")
 	})
-	ag := e.Group("/ali")
+	ag := e.Group("/api/ali")
 	ag.POST("/v1", func(c echo.Context) error {
 		msg := new(services.Requests)
 		if err := c.Bind(msg); err != nil {
@@ -117,7 +117,7 @@ func main() {
 		chat = &services.AliChat{Context: c}
 		return chat.Gen("v1")
 	})
-	dpg := e.Group("/deep")
+	dpg := e.Group("/api/deep")
 	dpg.POST("/v1", func(c echo.Context) error {
 		msg := new(services.Requests)
 		if err := c.Bind(msg); err != nil {

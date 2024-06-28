@@ -76,8 +76,12 @@ func (sc *DeepChat) Gen(ver string) error {
 	}
 	defer resp.Body.Close()
 	reader := bufio.NewReader(resp.Body)
+	w := sc.Response()
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
 	for {
 		line, err := reader.ReadString('\n')
+		log.Println(line)
 		if len(line) > 6 && line[:5] != "data:" {
 			utils.StreamOut(sc.Response(), line)
 			return nil
@@ -99,12 +103,14 @@ func (sc *DeepChat) Gen(ver string) error {
 			var br deepResponse
 			err = json.Unmarshal([]byte(eventData), &br)
 			if err != nil {
-				utils.StreamOut(sc.Response(), utils.FormatFailedMsg("unmarshal deep response failed"+err.Error()+eventData))
+				utils.Stream(sc.Response(), utils.FormatFailedMsg("unmarshal deep response failed"+err.Error()+eventData))
+				sc.Response().Flush()
 				return nil
 			}
 			for _, v := range br.Choices {
 				if v.Delta.Content != "" {
-					utils.StreamOut(sc.Response(), v.Delta.Content)
+					utils.Stream(sc.Response(), v.Delta.Content)
+					sc.Response().Flush()
 				}
 			}
 		}

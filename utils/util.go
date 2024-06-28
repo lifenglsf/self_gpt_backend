@@ -36,6 +36,7 @@ func StreamOut(resp *echo.Response, msg string) {
 		time.Sleep(time.Millisecond * 20)
 	}
 }
+
 func FormatFailedMsg(msg string) string {
 	//if code == 0 {
 	//	code = 500

@@ -7,6 +7,7 @@ import (
 	"github.com/lifenglsf/self_gpt_backend/config"
 	"github.com/lifenglsf/self_gpt_backend/utils"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -68,18 +69,26 @@ func (sc *AliChat) Gen(ver string) error {
 		utils.StreamOut(sc.Response(), utils.FormatFailedMsg("read ali response failed"))
 		return nil
 	}
+	w := sc.Response()
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
 	//log.Fatalln(string(respBody))
 	var br aliResponse
 	err = json.Unmarshal(respBody, &br)
+	log.Println(string(respBody))
 	if err != nil {
-		utils.StreamOut(sc.Response(), utils.FormatFailedMsg("unmarshal ali response failed"))
+		utils.Stream(sc.Response(), utils.FormatFailedMsg("unmarshal ali response failed"))
+		sc.Response().Flush()
 		return nil
 	}
 	if br.Code != "" {
-		utils.StreamOut(sc.Response(), utils.FormatFailedMsg("get ali response failed,"+br.Msg))
+		utils.Stream(sc.Response(), utils.FormatFailedMsg("get ali response failed,"+br.Msg))
+		sc.Response().Flush()
 		return nil
 	}
 	answer += br.Output.Text
-	utils.StreamOut(sc.Response(), answer)
+	log.Println(answer)
+	utils.Stream(sc.Response(), answer)
+	sc.Response().Flush()
 	return nil
 }
